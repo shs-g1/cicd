@@ -1,0 +1,31 @@
+# testweb.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: testweb-deployment
+  labels:
+    app: testweb
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: testweb
+  template:
+    metadata:
+      labels:
+        app: testweb
+    spec:
+      containers:
+      - name: testweb
+        #image: nh-web:v1.0
+        #image: 0c0aedbf-kr1-registry.container.nhncloud.com/nh-reg/nh-web@sha256:4653053375a6bb81866d0e5ecfe268f030c33961481c73b787d9d3244e23dd17
+        image: 0c0aedbf-kr1-registry.container.nhncloud.com/nh-reg/nh-web@sha256:017e4dec7dede9b3899eb1a92ed5d2fd6469fe84b42910691aa0ad102f000b84
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            cpu: "400m"
+          requests:
+            cpu: "100m"
+      imagePullSecrets:
+      - name: registry-credential

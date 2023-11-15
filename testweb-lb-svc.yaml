@@ -1,0 +1,25 @@
+# service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: testweb-lb-svc
+  labels:
+    app: testweb
+  annotations:
+    
+    # 전역 설정
+    #loadbalancer.nhncloud/pool-lb-method: SOURCE_IP
+    loadbalancer.nhncloud/loadbalancer-name: "NH-Pro-LB"
+    #loadbalancer.openstack.org/network-id: "1b637734-80fe-4f51-8b79-139373674ca6"
+    #loadbalancer.openstack.org/subnet-id: "ee89258f-eb5a-46c1-81ac-d94bcb2db110"
+    loadbalancer.nhncloud/listener-protocol: HTTP  
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  selector:
+    app: testweb
+  type: LoadBalancer
+  #LoadBalancer NodePort

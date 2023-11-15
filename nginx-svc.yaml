@@ -1,0 +1,19 @@
+# service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-svc
+  labels:
+    app: nginx
+  annotations:
+    #loadbalancer.openstack.org/network-id: "49a5820b-d941-41e5-bfc3-0fd31f2f6773"
+    #loadbalancer.openstack.org/subnet-id: "ee89258f-eb5a-46c1-81ac-d94bcb2db110"  
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  selector:
+    app: nginx
+  type: NodePort

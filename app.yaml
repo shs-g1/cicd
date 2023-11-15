@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jootopia-client-app
+  namespace: team-1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jootopia-client-app
+  template:
+    metadata:
+      labels:
+        app: jootopia-client-app
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: alpha.eksctl.io/nodegroup-name
+                operator: In
+                values:
+                - ng-1      
+      containers:
+      - name: jootopia-client-app
+        image: 686710509719.dkr.ecr.ap-northeast-2.amazonaws.com/team-1:20231020023716
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+        ports:
+        - containerPort: 3000
+--- 
+apiVersion: v1
+kind: Service
+metadata:
+  name: jootopia-client-service
+  namespace: team-1
+spec:
+  type: NodePort
+  selector:
+    app: jootopia-client-app
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+    targetPort: 3000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: jootopia-client-ingress
+  namespace: team-1
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/target-group-attributes: stickiness.enabled=true,stickiness.lb_cookie.duration_seconds=60
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}, {"HTTPS":443}]'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-northeast-2:686710509719:certificate/0eb3817e-1cbc-4397-b9cf-b91affd1bf00
+    alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}'
+    alb.ingress.kubernetes.io/tags: Service=argocd-server,Role=LB
+  labels:
+    app: jootopia-client-ingress
+spec:
+  rules:
+  - host: "team-1.shinhansec-pda.net"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: jootopia-client-service
+            port:
+              number: 80
